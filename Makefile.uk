@@ -1,0 +1,121 @@
+#  SPDX-License-Identifier: BSD-3-Clause
+#
+#  png Makefile.uk
+#
+#  Authors: Esteban Martinez <esteban.martinez@csuc.cat>
+#
+#  Copyright (c) 2019, Consorci de Serveis Universitaris de Catalunya (CSUC). All rights reserved.
+#
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that the following conditions
+#  are met:
+#
+#  1. Redistributions of source code must retain the above copyright
+#     notice, this list of conditions and the following disclaimer.
+#  2. Redistributions in binary form must reproduce the above copyright
+#     notice, this list of conditions and the following disclaimer in the
+#     documentation and/or other materials provided with the distribution.
+#  3. Neither the name of the copyright holder nor the names of its
+#     contributors may be used to endorse or promote products derived from
+#     this software without specific prior written permission.
+#
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+#  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+#  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+#  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+#  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+#  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+#  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+#  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+#  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+#  POSSIBILITY OF SUCH DAMAGE.
+#
+#  THIS HEADER MAY NOT BE EXTRACTED OR MODIFIED IN ANY WAY.
+#
+
+################################################################################
+# Library registration
+################################################################################
+$(eval $(call addlib_s,libpng,$(CONFIG_LIBPNG)))
+
+################################################################################
+# Original sources
+################################################################################
+LIBPNG_VERSION=1.6.37
+LIBPNG_URL=https://raw.githubusercontent.com/python-pillow/pillow-depends/master/libpng-$(LIBPNG_VERSION).tar.gz
+LIBPNG_PATCHDIR=$(LIBPNG_BASE)/patches
+LIBPNG_SUBDIR=png-$(LIBPNG_VERSION)
+$(eval $(call fetch,libpng,$(LIBPNG_URL)))
+$(eval $(call patch,libpng,$(LIBPNG_PATCHDIR),$(LIBPNG_SUBDIR)))
+
+################################################################################
+# Helpers
+################################################################################
+LIBPNG_EXTRACTED = $(LIBPNG_ORIGIN)/libpng-$(LIBPNG_VERSION)
+
+################################################################################
+# Library includes
+################################################################################
+LIBPNG_COMMON_INCLUDES-y      += -I$(LIBPNG_EXTRACTED)/
+
+CINCLUDES-$(CONFIG_LIBPNG)    += $(LIBPNG_COMMON_INCLUDES-y)
+
+LIBPNG_CINCLUDES   += -I$(LIBPNG_EXTRACTED)
+
+################################################################################
+# Global flags
+################################################################################
+# Suppressed flags
+LIBPNG_SUPPRESS_FLAGS += -Wno-unused-parameter \
+	-Wno-unused-variable -Wno-unused-value -Wno-unused-function \
+	-Wno-missing-field-initializers -Wno-implicit-fallthrough
+LIBPNG_CFLAGS-y   += $(LIBPNG_SUPPRESS_FLAGS) \
+	-Wno-pointer-to-int-cast -Wno-int-to-pointer-cast
+
+LIBPNG_DEFINES    += -DHAVE_CONFIG_H
+LIBPNG_DEFINES    += -DHAVE_FEENABLEEXCEPT
+LIBPNG_CFLAGS-y   += $(LIBPNG_DEFINES)
+
+################################################################################
+# PNG src
+################################################################################
+LIBPNG_SRCS-y += $(LIBPNG_EXTRACTED)/contrib/tools/pngfix.c
+LIBPNG_SRCS-y += $(LIBPNG_EXTRACTED)/png.c
+LIBPNG_SRCS-y += $(LIBPNG_EXTRACTED)/pngerror.c
+LIBPNG_SRCS-y += $(LIBPNG_EXTRACTED)/pngget.c
+LIBPNG_SRCS-y += $(LIBPNG_EXTRACTED)/pngmem.c
+LIBPNG_SRCS-y += $(LIBPNG_EXTRACTED)/pngpread.c
+LIBPNG_SRCS-y += $(LIBPNG_EXTRACTED)/pngread.c
+LIBPNG_SRCS-y += $(LIBPNG_EXTRACTED)/pngrio.c
+LIBPNG_SRCS-y += $(LIBPNG_EXTRACTED)/pngrtran.c
+LIBPNG_SRCS-y += $(LIBPNG_EXTRACTED)/pngrutil.c
+LIBPNG_SRCS-y += $(LIBPNG_EXTRACTED)/pngset.c
+LIBPNG_SRCS-y += $(LIBPNG_EXTRACTED)/pngtrans.c
+LIBPNG_SRCS-y += $(LIBPNG_EXTRACTED)/pngwio.c
+LIBPNG_SRCS-y += $(LIBPNG_EXTRACTED)/pngwrite.c
+LIBPNG_SRCS-y += $(LIBPNG_EXTRACTED)/pngwtran.c
+LIBPNG_SRCS-y += $(LIBPNG_EXTRACTED)/pngwutil.c
+LIBPNG_SRCS-y += $(LIBPNG_EXTRACTED)/mips/mips_init.c
+LIBPNG_SRCS-y += $(LIBPNG_EXTRACTED)/mips/filter_msa_intrinsics.c
+LIBPNG_SRCS-y += $(LIBPNG_EXTRACTED)/intel/intel_init.c
+LIBPNG_SRCS-y += $(LIBPNG_EXTRACTED)/intel/filter_sse2_intrinsics.c
+LIBPNG_SRCS-y += $(LIBPNG_EXTRACTED)/powerpc/powerpc_init.c
+LIBPNG_SRCS-y += $(LIBPNG_EXTRACTED)/powerpc/filter_vsx_intrinsics.c
+
+
+################################################################################
+# PNG prepare
+################################################################################
+# Run ./configure
+$(LIBPNG_EXTRACTED)/config.status: $(LIBPNG_BUILD)/.origin
+	$(call verbose_cmd,CONFIG,libpng: $(notdir $@), \
+		cd $(LIBPNG_EXTRACTED) && ./configure &&\
+		cp -f $(LIBPNG_EXTRACTED)/scripts/pnglibconf.h.prebuilt $(LIBPNG_EXTRACTED)/pnglibconf.h)
+
+LIBPNG_PREPARED_DEPS = \
+	$(LIBPNG_EXTRACTED)/config.status \
+
+$(LIBPNG_BUILD)/.prepared: $(LIBPNG_PREPARED_DEPS)
+
+UK_PREPARE += $(LIBPNG_BUILD)/.prepared
