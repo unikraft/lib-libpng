@@ -80,7 +80,6 @@ LIBPNG_CFLAGS-y   += $(LIBPNG_DEFINES)
 ################################################################################
 # PNG src
 ################################################################################
-LIBPNG_SRCS-y += $(LIBPNG_EXTRACTED)/contrib/tools/pngfix.c
 LIBPNG_SRCS-y += $(LIBPNG_EXTRACTED)/png.c
 LIBPNG_SRCS-y += $(LIBPNG_EXTRACTED)/pngerror.c
 LIBPNG_SRCS-y += $(LIBPNG_EXTRACTED)/pngget.c
