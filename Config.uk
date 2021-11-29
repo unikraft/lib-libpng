@@ -1,0 +1,11 @@
+menuconfig LIBPNG
+    bool "libpng - Portable Network Graphics"
+    default n
+    select LIBNOLIBC if !HAVE_LIBC
+    select LIBUKDEBUG
+    select LIBUKALLOC
+    select LIBNEWLIBC
+    select LIBZLIB
+
+if LIBPNG
+endif
