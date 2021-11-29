@@ -1,8 +1,8 @@
-config LIBPNG
-	bool "libpng - Portable Network Graphics"
-	default y
-	select LIBNOLIBC if !HAVE_LIBC
-	select LIBUKDEBUG
+menuconfig LIBPNG
+    bool "libpng - Portable Network Graphics"
+    default n
+    select LIBNOLIBC if !HAVE_LIBC
+    select LIBUKDEBUG
     select LIBUKALLOC
     select LIBNEWLIBC
     select LIBZLIB
