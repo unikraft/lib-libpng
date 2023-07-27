@@ -1,0 +1,98 @@
+#  libpng Makefile.uk
+#
+#  Authors: Andrei Tatar <andrei@unikraft.io>
+#
+#  Copyright (c) 2023, Unikraft GmbH and The Unikraft Authors.
+#
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that the following conditions
+#  are met:
+#
+#  1. Redistributions of source code must retain the above copyright
+#     notice, this list of conditions and the following disclaimer.
+#  2. Redistributions in binary form must reproduce the above copyright
+#     notice, this list of conditions and the following disclaimer in the
+#     documentation and/or other materials provided with the distribution.
+#  3. Neither the name of the copyright holder nor the names of its
+#     contributors may be used to endorse or promote products derived from
+#     this software without specific prior written permission.
+#
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+#  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+#  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+#  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+#  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+#  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+#  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+#  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+#  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+#  POSSIBILITY OF SUCH DAMAGE.
+#
+
+################################################################################
+# Library registration
+################################################################################
+$(eval $(call addlib_s,libpng,$(CONFIG_LIBPNG)))
+
+################################################################################
+# Sources
+################################################################################
+LIBPNG_VERSION=1.6.40
+LIBPNG_URL=https://download.sourceforge.net/libpng/libpng-$(LIBPNG_VERSION).tar.xz
+LIBPNG_DIRNAME=libpng-$(LIBPNG_VERSION)
+#LIBPNG_PATCHDIR=$(LIBPNG_BASE)/patches
+$(eval $(call fetch,libpng,$(LIBPNG_URL)))
+#$(eval $(call patch,libpng,$(LIBPNG_PATCHDIR),$(LIBPNG_DIRNAME)))
+
+################################################################################
+# Helpers
+################################################################################
+LIBPNG_SRC = $(LIBPNG_ORIGIN)/$(LIBPNG_DIRNAME)
+
+################################################################################
+# Library includes
+################################################################################
+# API
+LIBPNG__API += -I$(LIBPNG_SRC)
+LIBPNG__API += -iquote$(LIBPNG_BASE)/include
+
+CINCLUDES-$(CONFIG_LIBPNG) += $(LIBPNG__API)
+CXXINCLUDES-$(CONFIG_LIBPNG) += $(LIBPNG__API)
+
+# Internal
+LIBPNG_CINCLUDES += -I$(LIBPNG_BASE)/include
+
+################################################################################
+# Global flags
+################################################################################
+LIBPNG_CFLAGS += -DHAVE_CONFIG_H
+LIBPNG_CFLAGS += -funroll-loops
+
+################################################################################
+# Library sources
+################################################################################
+# These are taken from what upstream builds and sorted in alphabetical order.
+# Please maintain this ordering when updating the library.
+################################################################################
+LIBPNG_PNG_FLAGS-$(call have_gcc) += -Wno-maybe-uninitialized
+LIBPNG_SRCS-y += $(LIBPNG_SRC)/png.c
+LIBPNG_SRCS-y += $(LIBPNG_SRC)/pngerror.c
+LIBPNG_SRCS-y += $(LIBPNG_SRC)/pngget.c
+LIBPNG_SRCS-y += $(LIBPNG_SRC)/pngmem.c
+LIBPNG_SRCS-y += $(LIBPNG_SRC)/pngpread.c
+LIBPNG_SRCS-y += $(LIBPNG_SRC)/pngread.c
+LIBPNG_SRCS-y += $(LIBPNG_SRC)/pngrio.c
+LIBPNG_SRCS-y += $(LIBPNG_SRC)/pngrtran.c
+LIBPNG_SRCS-y += $(LIBPNG_SRC)/pngrutil.c
+LIBPNG_SRCS-y += $(LIBPNG_SRC)/pngset.c
+LIBPNG_SRCS-y += $(LIBPNG_SRC)/pngtrans.c
+LIBPNG_SRCS-y += $(LIBPNG_SRC)/pngwio.c
+LIBPNG_SRCS-y += $(LIBPNG_SRC)/pngwrite.c
+LIBPNG_SRCS-y += $(LIBPNG_SRC)/pngwtran.c
+LIBPNG_SRCS-y += $(LIBPNG_SRC)/pngwutil.c
+
+LIBPNG_SRCS-$(CONFIG_LIBINTEL_INTRINSICS) += $(LIBPNG_SRC)/intel/filter_sse2_intrinsics.c
+LIBPNG_SRCS-$(CONFIG_LIBINTEL_INTRINSICS) += $(LIBPNG_SRC)/intel/intel_init.c
+
+LIBPNG_SRCS-$(CONFIG_LIBPNG_TEST) += $(LIBPNG_SRC)/pngtest.c
