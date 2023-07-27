@@ -1,0 +1,10 @@
+menuconfig LIBPNG
+    bool "libpng - reference library for the PNG image format"
+    select LIBZLIB
+    default n
+
+if LIBPNG
+    config LIBPNG_TEST
+    bool "Provide pngtest as main function"
+
+endif
